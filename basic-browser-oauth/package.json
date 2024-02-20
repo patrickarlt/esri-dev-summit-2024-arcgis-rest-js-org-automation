@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "name": "@esri/arcgis-rest-demo-vanilla",
+  "version": "3.3.0",
+  "description": "Vanilla JavaScript demo of @esri/arcgis-rest-* packages",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "http-server ./ -c-1 -p 8080 -a localhost"
+  },
+  "dependencies": {
+    "@esri/arcgis-rest-auth": "^4.0.0",
+    "@esri/arcgis-rest-request": "^4.0.0",
+    "http-server": "^14.1.1"
+  },
+  "author": ""
+}

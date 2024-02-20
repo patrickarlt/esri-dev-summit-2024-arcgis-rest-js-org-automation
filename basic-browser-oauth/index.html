@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>ArcGIS REST JS Browser OAuth2</title>
+  <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/2.5.1/calcite.css" />
+  <style>
+    pre {
+      background-color: #f4f4f4;
+      padding: 10px;
+      border-radius: 5px;
+      overflow: auto;
+      max-height: 400px;
+      white-space: pre;
+      width: 65ch;
+    }
+  </style>
+</head>
+
+<body>
+
+  <calcite-button id='signInButton'>Sign in</calcite-button>
+
+  <p id="sessionInfo">
+    <!-- Information will be injected here. -->
+  </p>
+  
+  <pre><code id="sessionCode" style="white-space: pre;"></code></pre>
+  
+  <calcite-button id='signOutButton'>Sign Out</calcite-button>
+  
+  <script type="module" src="https://js.arcgis.com/calcite-components/2.5.1/calcite.esm.js"></script>
+  <script src="config.js"></script>
+  <script type="module">
+    import { ArcGISIdentityManager, ArcGISAccessDeniedError } from "https://cdn.skypack.dev/@esri/arcgis-rest-request@4.0.0";
+    
+    const signInButton = document.getElementById('signInButton')
+    const signOutButton = document.getElementById('signOutButton');
+
+    // Define a global session variable.
+    let session = null;
+
+    // Check to see if there is a serialized session in local storage.
+    const serializedSession = localStorage.getItem('__ARCGIS_REST_USER_SESSION__');
+
+    // If there is saved information, we can deserialize it into an instance of ArcGISIdentityManager
+    if (serializedSession !== null) {
+      session = ArcGISIdentityManager.deserialize(serializedSession);
+      updateSessionInfo(session);
+    }
+
+    // Update the UI with session info
+    function updateSessionInfo(session) {
+      // Get the signed in users into and log it to the console
+      if (session) {
+        session.getUser().then((user) => {
+          console.log("User info:", user);
+        });
+      }
+
+      let sessionInfo = document.getElementById('sessionInfo')
+      let sessionCode = document.getElementById("sessionCode");
+
+      if (session) {
+        signInButton.style.display = 'none';
+        signOutButton.style.display = 'inline-block';
+        sessionInfo.innerHTML = 'Logged in as ' + session.username;
+        sessionCode.innerHTML = JSON.stringify(session, null, 2);
+        localStorage.setItem('__ARCGIS_REST_USER_SESSION__', session.serialize());
+      } else {
+        signInButton.style.display = 'inline-block';
+        signOutButton.style.display = 'none';
+        sessionInfo.innerHTML = 'Sign in by clicking the button above.';
+        sessionCode.innerHTML = "No session info.";
+        localStorage.removeItem('__ARCGIS_REST_USER_SESSION__');
+      }
+    }
+
+    // Generic function to handle errors from the authentication handlers.
+    function handleAuthError(e) {
+      if(e instanceof ArcGISAccessDeniedError) {
+        alert("The user hit cancel on the authorization screen.");
+      } else {
+        alert(e.message);
+      }
+    }
+
+    // Call the function on page load to set current state.
+    updateSessionInfo(session);
+
+    // Attach a listener to the sign in buttons.
+    signInButton.addEventListener('click', function (event) {
+      // Start to configure the oAuth2 options.
+      const opts = {
+        clientId: config.clientId,
+        redirectUri: config.popupRedirectUri,
+      };
+      
+      if (config.portal) {
+        opts.portal = config.portal;
+      }
+
+      ArcGISIdentityManager.beginOAuth2(opts).then(function (newSession) {
+        // Upon a successful login, update the session with the new session.
+        session = newSession;
+        updateSessionInfo(session);
+      }).catch(e => {
+        handleAuthError(e);
+      });
+    });
+
+    // Attach a listener to the sign out button.
+    signOutButton.addEventListener('click', function (event) {
+      // destroy the session and remove the item in local storage
+      ArcGISIdentityManager.destroy(session).then(({ success }) => {
+        if (success) {
+          // Clear the previous session.
+          session = null;
+          localStorage.removeItem('__ARCGIS_REST_USER_SESSION__');
+        }
+      }).finally(() => {
+        updateSessionInfo();
+      });
+    });
+  </script>
+</body>
+
+</html>
