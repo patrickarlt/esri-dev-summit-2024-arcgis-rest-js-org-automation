@@ -1,11 +1,26 @@
 {
+  "private": true,
   "name": "protect-web-map",
   "version": "1.0.0",
-  "description": "Demo showing how to protect items in a web map in a Node.js application",
+  "description": "",
+  "license": "MIT",
+  "keywords": [],
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "ts-node index.ts"
   },
-  "author": "",
-  "license": "ISC"
+  "bin": {
+    "protect-web-map": "echo 'test'"
+  },
+  "dependencies": {
+    "@esri/arcgis-rest-portal": "^4.4.0",
+    "@esri/arcgis-rest-request": "^4.2.0",
+    "commander": "^12.0.0",
+    "dotenv": "^16.4.5",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.2",
+    "yargs": "^17.7.2"
+  },
+  "author": "Patrick Arlt"
 }
