@@ -154,7 +154,7 @@ if (protect) {
     console.log(`\n\nAttempting to protect:`);
     console.table(itemsToProtect);
 
-    const protectResults = await Promise.all(
+    await Promise.all(
       itemsToProtect.map(async ({ itemId }: any) => {
         try {
           const result = await protectItem({ id: itemId, authentication });
