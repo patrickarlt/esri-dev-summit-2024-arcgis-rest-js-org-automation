@@ -5,15 +5,21 @@ import {
   getItem,
   getItemData,
   protectItem,
+  unprotectItem,
   IItem,
 } from "@esri/arcgis-rest-portal";
 import { ArcGISIdentityManager } from "@esri/arcgis-rest-request";
 
 // setup the commander program to parse the command line options
-program.argument("webmap").option("-p, --protect", "Protect items").parse();
+program
+  .argument("webmap")
+  .option("-p, --protect", "Protect items")
+  .option("-u, --unprotect", "Unprotect items")
+  .parse();
 
 const webmapItemId = program.args[0];
 const protect: boolean = program.opts().protect;
+const unprotect: boolean = program.opts().unprotect;
 
 // load credentials from the .env file, you could also use command line options to set these
 const username = process.env.USERNAME;
@@ -106,11 +112,11 @@ function getProtectionStatus(item: IItem) {
     return "Authoritative";
   }
 
-  if (isProtected && isOrg) {
+  if (isProtected && (isOrg || isOwner)) {
     return "Protected";
   }
 
-  if (!isProtected && isOwner) {
+  if (!isProtected && (isOrg || isOwner)) {
     return "Unprotected";
   }
 
@@ -151,18 +157,21 @@ if (unprotectableItems.length > 0) {
 // if the protect flag is set, attempt to protect the items
 if (protect) {
   if (itemsToProtect.length > 0) {
-    console.log(`\n\nAttempting to protect:`);
+    console.log(`\n\nAttempting to protect ${itemsToProtect.length} item(s)`);
     console.table(itemsToProtect);
 
     await Promise.all(
-      itemsToProtect.map(async ({ itemId }: any) => {
+      itemsToProtect.map(async ({ itemId, title }: any) => {
         try {
           const result = await protectItem({ id: itemId, authentication });
           if (result.success) {
-            console.log(`\n\nItem ${itemId} protected.`);
+            console.log(`\n\nItem ${title} (${itemId}) protected.`);
           }
           return result;
         } catch (error: any) {
+          console.log(
+            `\n\nError protecting ${title} (${itemId}): ${error.message}`
+          );
           return {
             itemId,
             error: true,
@@ -172,8 +181,63 @@ if (protect) {
       })
     );
   }
-} else {
+
+  try {
+    console.log("\n\nAttempting to protect webmap");
+    await protectItem({ id: webmapItem.id, authentication });
+    console.log(`\n\nWebmap ${webmapItem.title} (${webmapItem.id}) protected.`);
+  } catch (error: any) {
+    console.log(`\n\nError protecting webmap: ${error.message}`);
+  }
+
+  process.exit(0);
+}
+
+// this is for resetting the demo to un-protect the items
+if (unprotect) {
+  if (itemsToProtect.length > 0) {
+    console.log(
+      `\n\nAttempting to un-protect ${itemsToProtect.length} item(s)`
+    );
+    console.table(itemsToProtect);
+
+    await Promise.all(
+      itemsToProtect.map(async ({ itemId, title }: any) => {
+        try {
+          const result = await unprotectItem({ id: itemId, authentication });
+          if (result.success) {
+            console.log(`\n\nItem ${title} (${itemId}) un-protected.`);
+          }
+          return result;
+        } catch (error: any) {
+          console.log(
+            `\n\nError un-protecting ${title} (${itemId}): ${error.message}`
+          );
+          return {
+            itemId,
+            error: true,
+            message: error.message,
+          };
+        }
+      })
+    );
+  }
+
+  try {
+    console.log("\n\nAttempting to un-protect webmap");
+    await unprotectItem({ id: webmapItem.id, authentication });
+    console.log(
+      `\n\nWebmap ${webmapItem.title} (${webmapItem.id}) un-protected.`
+    );
+  } catch (error: any) {
+    console.log(`\n\nError un-protecting webmap: ${error.message}`);
+  }
+
+  process.exit(0);
+}
+
+if (itemsToProtect.length > 0) {
   console.log(`\n\Items you can protect:`);
   console.table(itemsToProtect);
-  console.log(`\nUse the -p flag to protect items`);
+  console.log(`Re-run with the -p flag to protect items`);
 }

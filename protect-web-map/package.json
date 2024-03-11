@@ -8,7 +8,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node index.ts"
+    "start:parcelMap": "ts-node index.ts aacf3d8965a447cba63c7277ea7bc11a",
+    "start:customMap": "ts-node index.ts 94aa4e7a3fda4b978b2157b464326fe4"
   },
   "bin": {
     "protect-web-map": "echo 'test'"

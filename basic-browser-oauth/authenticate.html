@@ -13,12 +13,8 @@
 
     let opts = {
       clientId: config.clientId,
-      redirectUri: config.redirectUri,
-      popup: true,
-    }
-
-    if (config.portal) {
-      opts.portal = config.portal
+      redirectUri: config.popupRedirectUri,
+      popup: true, // the default
     }
 
     ArcGISIdentityManager.completeOAuth2(opts);

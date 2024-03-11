@@ -93,12 +93,9 @@
       const opts = {
         clientId: config.clientId,
         redirectUri: config.popupRedirectUri,
+        popup: true, // the default
       };
       
-      if (config.portal) {
-        opts.portal = config.portal;
-      }
-
       ArcGISIdentityManager.beginOAuth2(opts).then(function (newSession) {
         // Upon a successful login, update the session with the new session.
         session = newSession;
