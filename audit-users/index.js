@@ -85,6 +85,10 @@ const formatted = results.reduce((acc, result) => {
   return acc;
 }, {});
 
+if (Object.keys(formatted).length <= 0) {
+  console.log("No users found with the specified privilege");
+}
+
 Object.keys(formatted).forEach((key) => {
   const username = key;
   const privileges = formatted[key];

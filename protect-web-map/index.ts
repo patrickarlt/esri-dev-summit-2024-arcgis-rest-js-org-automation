@@ -63,7 +63,6 @@ async function checkItem(itemId: string) {
     title: "Unknown",
     itemId,
     owner: "Unknown",
-    error: false,
   };
 
   try {
@@ -77,12 +76,12 @@ async function checkItem(itemId: string) {
     result.title = item.title;
 
     if (!isOwner && !isOrg) {
-      result.message = `Item belongs to another organization.`;
+      result.message = `Owned by other org`;
       result.status = getProtectionStatus(item);
     }
 
     if (!isOwner && isOrg) {
-      result.message = `Item belongs to someone else in your organization.`;
+      result.message = `Owned by your org.`;
       result.status = getProtectionStatus(item);
     }
 
@@ -94,9 +93,8 @@ async function checkItem(itemId: string) {
       result.status = getProtectionStatus(item);
     }
   } catch (error: any) {
-    result.error = true;
     result.message = error?.message;
-    result.status = "error";
+    result.status = "Error";
   }
 
   return result;
@@ -138,6 +136,11 @@ const protectedItems = checkResults.filter((item: any) => {
   return item.status === "Protected" || item.status === "Authoritative";
 });
 
+// filter the results to items that are protected
+const ownedItems = checkResults.filter((item: any) => {
+  return item.owner === user.username;
+});
+
 //log the results
 console.log(
   `\n\nWebmap: ${webmapItem.title} (${webmapItem.id}) - Owner: ${webmapItem.owner}`
@@ -174,7 +177,6 @@ if (protect) {
           );
           return {
             itemId,
-            error: true,
             message: error.message,
           };
         }
@@ -195,14 +197,12 @@ if (protect) {
 
 // this is for resetting the demo to un-protect the items
 if (unprotect) {
-  if (itemsToProtect.length > 0) {
-    console.log(
-      `\n\nAttempting to un-protect ${itemsToProtect.length} item(s)`
-    );
-    console.table(itemsToProtect);
+  if (ownedItems.length > 0) {
+    console.log(`\n\nAttempting to un-protect ${ownedItems.length} item(s)`);
+    console.table(ownedItems);
 
     await Promise.all(
-      itemsToProtect.map(async ({ itemId, title }: any) => {
+      ownedItems.map(async ({ itemId, title }: any) => {
         try {
           const result = await unprotectItem({ id: itemId, authentication });
           if (result.success) {
@@ -215,7 +215,6 @@ if (unprotect) {
           );
           return {
             itemId,
-            error: true,
             message: error.message,
           };
         }
