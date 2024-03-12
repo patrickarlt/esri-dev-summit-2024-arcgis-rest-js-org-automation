@@ -25,7 +25,7 @@
   </div>
   <div class="grid-x grid-margin-x">
     <div class="cell">
-      <button id="getWebMaps" type="button" class="button">Get Org Web Maps</button>
+      <button id="getWebMaps" type="button" class="button">Get Web Maps</button>
       <button id="expireToken" type="button" class="button">Expire Token</button>
       <button id="refreshSession" type="button" class="button">Refresh Credentials</button>
       <a href="/sign-out" class="button">Sign Out</a>
@@ -93,7 +93,7 @@
   updateDisplay();
   syncAuthToJsApi();
 
-  // Use `session.toCredential()` to conver the ArcGIS REST auth into a format suitable to pass into the JS API `registerToken` function.
+  // Use `session.toCredential()` to convert the ArcGIS REST auth into a format suitable to pass into the JS API `registerToken` function.
   // This sends the auth from ArcGIS REST JS to the JS API.
   function syncAuthToJsApi(){
     require(["esri/identity/IdentityManager"], (esriId) => {
@@ -123,10 +123,7 @@
         .in("type")
         .and()
         .match(user.username)
-        .in("owner")
-        .and()
-        .match("private")
-        .in("access"),
+        .in("owner"),
       authentication: session
     });
 

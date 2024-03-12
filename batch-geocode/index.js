@@ -80,7 +80,6 @@ const publishResponse = await request(
   {
     authentication,
     params: {
-      f: "json",
       itemId: item.id,
       filetype: "csv",
       publishParameters: analyzeResult.publishParameters,

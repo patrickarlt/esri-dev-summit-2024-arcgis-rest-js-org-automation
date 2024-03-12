@@ -6,5 +6,4 @@ once you have a clientid of your own, copy/paste it here and rename this file 'c
 const config = {
   clientId: "7GM6zotbv5UG0Jga",
   popupRedirectUri: "http://localhost:8080/authenticate.html",
-  inlineRedirectUri: "http://localhost:8080/",
 };
